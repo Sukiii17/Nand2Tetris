@@ -1,5 +1,5 @@
 # Nand2Tetris
-This repository contains all projects for Nand2Tetris. Nand2Tetris website: (https://www.nand2tetris.org/).
+This repository contains all projects for Nand2Tetris. Nand2Tetris website: https://www.nand2tetris.org/
 - Project 0: Introduction
 - Project 1: Boolean Logic
 - Project 2: Boolean Arithmetic
