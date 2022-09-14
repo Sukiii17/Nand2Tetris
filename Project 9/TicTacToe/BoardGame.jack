@@ -1,0 +1,285 @@
+// File name: HuangShuqiProject9/TicTacToe/BoardGame.jack
+ 
+/** This class implements the game TicTacToe, where the computer is supposed to
+play wisely against human. */
+class BoardGame{
+
+   field Board board;  // board of the game   
+   field Array boardArray; // 0 empty, 1 cross (player), 2 nought (computer)
+   field boolean playerWin, compWin; // keep track of whether player or computer wins
+   field int winRowCol; // winning row or column of the board (if won by row or column)
+   field int winMode; // 1 - by row, 2 - by column, 3 - by main diagonal, 4 - by minor diagonal
+   field int emptyCellCount; // keep track of the number of empty cells
+
+
+   /** Constructs a new game of Tie Tac Toe. */
+   constructor BoardGame new(){
+      var int i;
+      let board = Board.new();
+      let playerWin = false;
+      let compWin = false;
+      let boardArray = Array.new(9);
+      let winRowCol = 0;
+      let emptyCellCount = 9;
+      let i = 0;
+      while (i<9){
+         let boardArray[i] = 0;
+          let i = i+1;
+      }
+      return this;
+   }
+
+
+   /** Disposes the game. */
+   method void dispose(){
+      do board.dispose();
+      do Memory.deAlloc(this);
+      return;
+   }
+
+
+   /** Checks if there is a winner on the board. */
+   method boolean checkWin(int player){
+      var int i,a1,a2,a3;
+      var boolean isWinner;
+      let i = 0;
+      let isWinner = false;
+      while (i<3){
+          let a1 = 3*i;
+          let a2 = 3*i+1;
+          let a3 = 3*i+2;
+          if ((boardArray[a1]=player) & (boardArray[a2]=player) & (boardArray[a3]=player)) {
+              let winMode = 1;
+              let winRowCol = i;
+              let isWinner = true;
+              return isWinner;
+          }
+          let i = i+1;
+      }
+      let i = 0;
+      while (i<3){
+          let a1 = i;
+          let a2 = i+3;
+          let a3 = i+6;
+          if ((boardArray[a1]=player) & (boardArray[a2]=player) & (boardArray[a3]=player)) {
+              let isWinner = true;
+              let winMode = 2;
+              let winRowCol = i;
+              return isWinner;
+          }
+          let i = i+1;
+      }
+      if ((boardArray[0]=player) & (boardArray[4]=player) & (boardArray[8]=player)) {
+          let isWinner = true;
+          let winMode = 3;
+          return isWinner;
+      }
+      if ((boardArray[2]=player) & (boardArray[4]=player) & (boardArray[6]=player)) {
+          let isWinner = true;
+          let winMode = 4;
+          return isWinner;
+      }
+      return isWinner;
+   }
+   
+
+   /** Make a move. */
+   method void makeMove(int position, int player){
+      let boardArray[position] = player;
+      let emptyCellCount = emptyCellCount - 1;
+      return;
+   }
+
+
+   /** Checks if the cell is a valid cell to go to. */
+   method boolean isValid(int position){
+       if ((position>8)|(position<0)){
+           return false;
+       } else{
+           if (~(boardArray[position]=0)){
+               return false;
+           }
+       }
+       return true;
+   }
+
+
+   /** Computes the optimal move for the computer. The strategy is in the following order:
+       1. If the computer can win or can prevent the player to win, it will move there.
+       2. If corner cells are available, randomly select one.
+       3. If center cell is available, it will move there.
+       4. Otherwise, it will randomly move to an edge cell. */
+   method int compMove(){
+      var int i, countCorners, countEdges;
+      var Array corners, edges;
+      var boolean centerAvailable;
+      let i = 0;
+      let countCorners = 0;
+      let countEdges = 0;
+      let corners = Array.new(4);
+      let edges = Array.new(4);
+      let centerAvailable = false;
+
+      // check if there is a way to win or block your opponent from winning.
+      while (i<9){
+          if (boardArray[i]=0){
+
+              // collect and count all available corner cells.
+              if ((i=0)|(i=2)|(i=6)|(i=8)){
+              let corners[countCorners] = i;
+              let countCorners = countCorners + 1;
+              }
+
+              // collect and count all available edge cells.
+              if ((i=1)|(i=3)|(i=5)|(i=7)){
+              let edges[countEdges] = i;
+              let countEdges = countEdges + 1;
+              }
+
+              // check if the center cell is available.
+              if (i=4){
+              let centerAvailable = true;
+              }
+
+              // check if there is a way to block the player from winning.
+              let boardArray[i] = 1;
+              if (checkWin(1)){
+                  let boardArray[i] = 0;         
+                  return i;
+              }
+
+              // check if there is a way to win for the computer.
+              let boardArray[i] = 2;
+              if (checkWin(2)){
+                  let boardArray[i] = 0;         
+                  return i;
+              }
+              let boardArray[i] = 0;
+          }
+          let i = i+1;
+      }
+
+      // If there are available corners to move, select a random one to move to.
+      if (countCorners>0){
+          let countCorners = countCorners-1;
+          let i = Random.randRange(countCorners);
+          return corners[i];
+      }
+
+      // If the middle cell is available, move there.
+      if (centerAvailable){
+          return 4;
+      }   
+
+      // If there are available edges to move, select a random one to move to.
+      if (countEdges>0){
+          let countEdges = countEdges-1;
+          let i = Random.randRange(countEdges);
+          return edges[i];
+      }  
+      return 0;
+   }
+
+
+   /** Implements the game of Tic Tac Toe, where the computer plays wisely against human.
+It combines all previous parts of graphic demonstration and AI.*/
+   method void playGame(){
+      var char key;
+      var int compMove;
+      var String s;
+
+      // Instructions before the start of the game.
+      // do Output.moveCursor(0,0);
+      do Output.printString("Tic Tac Toe Instructions");
+      do Output.println();
+      do Output.println();
+      do Output.printString("The game is played on a grid that is 3 squares by 3 squares.");
+      do Output.println();
+      do Output.println();
+      do Output.printString("You are X, the computer is O. Players take turns putting their marks in empty squares.");
+      do Output.println();
+      do Output.println();
+      do Output.printString("The first player to get 3 of her marks in a row, column, or diagonal is the winner.");
+      do Output.println();
+      do Output.println();
+      do Output.printString("When all 9 squares are full, the game is over. If no player has 3 marks in a row, the game ends in a tie.");
+      do Output.println();
+      do Output.println();
+      do Output.printString("You will be the first mover. Input 1-9 to choose the cells to play.");  
+      do Output.println();
+      do Output.println();
+      do Output.printString("Understand the rules? We will start soon!");  
+      do Sys.wait(5000);
+      do Screen.clearScreen();
+
+      // start playing the game
+      do board.drawBoard();
+      do Output.moveCursor(0,0);
+      do Output.printString("To play the game, select an empty position between 1-9.");
+      do Sys.wait(50);
+      while ((emptyCellCount>0) & (~playerWin) & (~compWin)){
+          do Output.moveCursor(0,0);
+          do Output.printString("To play the game, select an empty position between 1-9.");
+          //do Output.println();
+          //do Output.println();
+          do Output.moveCursor(3,0);
+          do Output.printString("Your selected cell is: ");
+          let key = Keyboard.readChar();
+          let key = key - 49;
+          while (~(isValid(key))){
+              if ((key>8)|(key<0)){
+                  do Output.moveCursor(0,0);
+                  let s = "Your input is invalid. Please enter a number between 1-9.";
+                  do Output.printString(s);
+                  do s.dispose();
+              }
+              if ((key<9)&(key>-1)){
+                  do Output.moveCursor(0,0);
+                  let s = "Your chosen cell is occupied. Please select another one.";
+                  do Output.printString(s);
+                  do s.dispose();
+              }
+              //do Output.println();
+              //do Output.println();
+              do Output.moveCursor(3,0);
+              do Output.printString("Your selected cell is: ");
+              let key = Keyboard.readChar();
+              let key = key - 49;
+              do Output.moveCursor(0,0);
+              let s = "To play the game, select an empty position between 1-9.   ";
+              do Output.printString(s);
+              do s.dispose();
+          } 
+          do makeMove(key, 1);
+          do board.drawCross(key);
+          let playerWin = checkWin(1);
+          if (playerWin){
+              do board.drawWin(winMode, winRowCol);
+              do Output.moveCursor(0,0);
+              do Output.printString("You have won the game!!!                             ");
+              return;
+          }
+          if (emptyCellCount=0){
+              do Output.moveCursor(0,0);
+              do Output.printString("Game over. It is a tie.                              ");
+              return;
+          }
+          let compMove = compMove();
+          do makeMove(compMove, 2);
+          do Sys.wait(50);
+          do board.drawNought(compMove); 
+          let compWin = checkWin(2);
+          if (compWin){
+              do board.drawWin(winMode, winRowCol);
+              do Output.moveCursor(0,0);
+              do Output.printString("Sorry, you lose the game :(                              ");
+              return;
+          }         
+      }
+      do Output.moveCursor(0,0);
+      do Output.printString("Game over. It is a tie.");
+      return;
+   }
+}
+
+

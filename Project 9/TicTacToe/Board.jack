@@ -1,0 +1,138 @@
+// File name: HuangShuqiProject9/TicTacToe/Board.jack
+ 
+/** This class is for implementing the graphic parts of the program. */
+class Board{
+   
+   field int boardX, boardY, boardSize, cellSize, lineWidth; // board location, size and line width
+
+   /** Constructs a new board for the game. */
+   constructor Board new(){
+      let boardX = 220;
+      let boardY = 60;
+      let boardSize = 120;
+      let cellSize = 40;
+      let lineWidth = 2;
+      return this;
+   }
+
+
+   /** Disposes the board. */
+   method void dispose() {
+      do Memory.deAlloc(this);
+      return;
+   }
+
+
+   /** Draws the board borders for the game. */
+   method void drawBoard() {
+      // draw vertical lines
+      do Screen.drawRectangle(boardX+cellSize-lineWidth, boardY, boardX+cellSize+lineWidth, boardY+boardSize);
+      do Screen.drawRectangle(boardX+(2*cellSize)-lineWidth, boardY, boardX+(2*cellSize)+lineWidth, boardY+boardSize);
+      // draw horizontal lines
+      do Screen.drawRectangle(boardX, boardY+cellSize-lineWidth, boardX+boardSize, boardY+cellSize+lineWidth);
+      do Screen.drawRectangle(boardX, boardY+(2*cellSize)-lineWidth, boardX+boardSize, boardY+(2*cellSize)+lineWidth);
+      return;
+   }
+
+
+   /** Draws the Nought symbol for the game. */
+   method void drawNought(int position) {
+      var int r,c;
+      var int x,y;
+      let c = position/3;
+      let r = position - (3*c);
+      let x = boardX+(r*cellSize)+(cellSize/2);
+      let y = boardY+(c*cellSize)+(cellSize/2);      
+      do Screen.drawCircle(x,y,8);
+      do Screen.setColor(false);
+      do Screen.drawCircle(x,y,4);
+      do Screen.setColor(true);
+      return;
+   }
+
+
+   /** Draws the Cross symbol for the game. */
+   method void drawCross(int position) {
+      var int r,c;
+      var int i,x,y;
+      let i = 3;
+      let c = position/3;
+      let r = position - (3*c);
+      let x = boardX+(r*cellSize)+(cellSize/2);
+      let y = boardY+(c*cellSize)+(cellSize/2);
+      while (~(i<0)){
+            do Screen.drawLine(x-8,y-8+i,x+8-i,y+8);
+            do Screen.drawLine(x-8+i,y-8,x+8,y+8-i);
+            do Screen.drawLine(x+8-i,y-8,x-8,y+8-i);
+            do Screen.drawLine(x+8,y-8+i,x-8+i,y+8);
+            let i = i-1;
+      }
+      return;
+   }
+
+
+   /** Draws the horizontal winning line for the game. */
+   method void drawRowWin(int r) {
+      var int positionY;
+      let positionY = boardY+(r*cellSize)+(cellSize/2);
+      do Screen.drawRectangle(boardX,positionY-lineWidth,boardX+boardSize,positionY+lineWidth);
+      return;
+   }
+
+
+   /** Draws the vertical winning line for the game. */
+   method void drawColWin(int c) {
+      var int positionX;
+      let positionX = boardX+(c*cellSize)+(cellSize/2);
+      do Screen.drawRectangle(positionX-lineWidth,boardY,positionX+lineWidth,boardY+boardSize);
+      return;
+   }
+
+
+   /** Draws the main diagonal winning line for the game. */
+   method void drawMainDiagWin() {
+      var int i;
+      let i = 3;
+      while (~(i<0)){
+            do Screen.drawLine(boardX+i,boardY,boardX+boardSize,boardY+boardSize-i);
+            do Screen.drawLine(boardX,boardY+i,boardX+boardSize-i,boardY+boardSize);
+            let i = i-1;
+      }
+      return;
+   }
+
+
+   /** Draws the minor diagonal winning line for the game. */
+   method void drawMinorDiagWin() {
+      var int i;
+      let i = 3;
+      while (~(i<0)){
+            do Screen.drawLine(boardX+boardSize-i,boardY,boardX,boardY+boardSize-i);
+            do Screen.drawLine(boardX+boardSize,boardY+i,boardX+i,boardY+boardSize);
+            let i = i-1;
+      }
+      return;
+   }
+
+
+/** Draws winning line according to the winning mode: 
+    1 - by row, 2 - by column, 3 - by main diagonal, 4 - by minor diagonal. */
+   method void drawWin(int winMode, int winRowCol) {
+       if (winMode=1){
+           do drawRowWin(winRowCol);
+       }
+       if (winMode=2){
+           do drawColWin(winRowCol);
+       }
+       if (winMode=3){
+           do drawMainDiagWin();
+       }
+       if (winMode=4){
+           do drawMinorDiagWin();
+       }
+       return;
+   }
+
+}
+
+

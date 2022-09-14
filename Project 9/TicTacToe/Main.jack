@@ -1,0 +1,12 @@
+// File name: HuangShuqiProject9/TicTacToe/Main.jack
+
+/** Initializes a new Tic Tac Toe game and starts running it. */
+class Main {
+    function void main() {
+        var BoardGame game;
+        let game = BoardGame.new();
+        do game.playGame();
+        do game.dispose();
+        return;
+    }
+}
